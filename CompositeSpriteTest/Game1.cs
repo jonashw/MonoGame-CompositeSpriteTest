@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CompositeSpriteTest.Robot;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,28 +24,20 @@ namespace CompositeSpriteTest
             Content.RootDirectory = "Content";
         }
 
-        private CompositeSprite _selectedSprite;
         private IEnumerable<CompositeSprite> _selectableSprites;
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             var robot = RobotFactory.Create(Content,new Vector2(573,591));
             _font = Content.Load<SpriteFont>("Consolas");
-            _selectedSprite = robot.EntireSprite;
-            _selectableSprites = new[]
-            {
-                robot.ForeArm,
-                robot.HindArm,
-                robot.EntireSprite,
-                robot.Eye
-            }.Concat(robot.WheelSprites);
+            _selectableSprites = robot.Sprites.ToArray();
 
             _entities.Add(
                 new SpriteManipulator(
                     _font,
                     new CircularArray<CompositeSprite>(_selectableSprites.ToArray())));
 
-            _entities.Add(robot);
+            _entities.Add(robot.Entity);
 
             var groundTexture = RectangleTextureFactory.Create(
                 GraphicsDevice,

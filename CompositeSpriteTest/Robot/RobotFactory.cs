@@ -1,14 +1,22 @@
 ﻿using System;
+using CompositeSpriteTest.Robot.RobotComponents;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace CompositeSpriteTest
+namespace CompositeSpriteTest.Robot
 {
     public static class RobotFactory
     {
-        public static Robot Create(ContentManager content, Vector2 position)
+        public static RobotEntityAndSprites Create(ContentManager content, Vector2 position)
         {
+            /* This method wires all the Robot's components together.  
+             * The individual sprites are composed in a parent/child hierarchy to allow group transformations.
+             * The setup here is the sort of thing that one could do at design time with Spine or Spriter. 
+             *
+             * The Robot's sprites are not publicly reachable through Robot itself, since they are implementation details.
+             * To allow debugging and run-time tweaking of the sprite configurations,
+             * we make the Sprites available separately, at the time of Robot creation.  */
             var wheelTexture = content.Load<Texture2D>("wheel");
             var eye = new CompositeSprite(content.Load<Texture2D>("eye"))
             {
@@ -50,10 +58,18 @@ namespace CompositeSpriteTest
                 ZIndex = 0.5f
             };
 
-            return new Robot(body, hindArm, foreArm, eye, wheelA, wheelB)
+            var robot = new RobotEntity(
+                body,
+                new RobotArmComponent(hindArm, eye, -(float) Math.PI/2, 0),
+                new RobotArmComponent(foreArm, eye, 0, (float) Math.PI/2),
+                new RobotWheelsComponent(wheelA, wheelB))
             {
                 Position = position
             };
+
+            return new RobotEntityAndSprites(
+                robot,
+                new[] {body, hindArm, foreArm, wheelA, wheelB, eye});
         }
     }
 }
